@@ -3,17 +3,23 @@
 pragma solidity ^0.8.0;
 
 /*
- 部署自己的 Token(ERC20)
+发行一个具备回调功能的 ERC20Token , 加入回调token
 
-• 编写一个TokenBank ,可以将Token 存入 TokenBank:
+tokensReceived
 
-• 记录每个用户存入的 token 数量
+• 保持原有逻辑下,扩展 TokenBank, 实现在转账回调中,将
 
-• 管理员可以提取所有的Token (withdraw 方法)。
+Token 存入 TokenBank
+
+• 转账用 OpenZeppelin 的 safeTransferFrom
 */
 
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
+
+interface IBank {
+        function tokenRecieve(address user, uint amount) external;
+} 
 
 contract btcToken is ERC20{
     
@@ -33,6 +39,12 @@ contract btcToken is ERC20{
         _mint(receiver, amount);
    }
    
+   //用户直接向目标地址存款
+   function deposit(address bank, uint amount) public{
+         _transfer(msg.sender, bank, amount);
+        IBank(bank).tokenRecieve(msg.sender, amount);
+
+   }
 
 
 }
